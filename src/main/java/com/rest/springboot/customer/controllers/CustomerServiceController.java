@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import com.rest.springboot.customer.models.CustomerModel;
 import com.rest.springboot.customer.repositories.ICustomerRepository;
+import com.rest.springboot.exceptions.ServiceResourceNotCreatedOrUpdatedException;
 import com.rest.springboot.exceptions.ServiceResourceNotFoundException;
 import com.rest.springboot.utils.ServiceUtil;
 
@@ -52,7 +53,7 @@ public class CustomerServiceController
 	@GetMapping("/customer")
 	public List<CustomerModel> getCustomerList() 
 	{		
-			return iCustomerRepository.findAll();		
+			return iCustomerRepository.findCustomerList();	
 	}
 	
 	@PostMapping("/customer")
@@ -62,8 +63,6 @@ public class CustomerServiceController
 		ServiceUtil.isNotNull(customerModel);
 			
 		return iCustomerRepository.save(customerModel);
-		//OR
-		//return ResponseEntity.badRequest().build();
 	}
 	
 	@DeleteMapping("/customer/id/{id}")
@@ -72,7 +71,19 @@ public class CustomerServiceController
 	{		
 		ServiceUtil.isNotNull(id);
 		
-		iCustomerRepository.deleteById(id);
+		CustomerModel cM = iCustomerRepository.getOne(id);
+		
+		if(cM != null)
+		{
+			cM.setDeleted(1);
+			
+			iCustomerRepository.save(cM);
+			
+		}
+		else
+		{
+			throw new ServiceResourceNotFoundException("Customer", "id", id);	
+		}
 		
 		return ResponseEntity.ok().build();
 
@@ -80,12 +91,37 @@ public class CustomerServiceController
 
 	@PutMapping("/customer/uuid/{uuid}")
 	@CacheEvict(cacheNames="customerList", allEntries=true)
-	public Optional<CustomerModel> updateCustomerByUuid(@PathVariable(value = "id") final int id, 
+	public CustomerModel updateCustomerByUuid(@PathVariable(value = "id") final Integer id, 
 			@Valid @RequestBody CustomerModel customerModel ) 
 	{		
 		ServiceUtil.isNotNull(id);
 		ServiceUtil.isNotNull(customerModel);
 		
-		return null;			
+		CustomerModel cM = iCustomerRepository.getOne(id);
+		
+		if(cM != null)
+		{
+			cM.setBGA(customerModel.getBGA());
+			cM.setCreatedAt(customerModel.getCreatedAt());
+			cM.setCreatedBy(customerModel.getCreatedBy());
+			cM.setDeleted(customerModel.getDeleted());
+			cM.setName(customerModel.getName());
+			cM.setName2(customerModel.getName2());
+			cM.setSalesRole(customerModel.getSalesRole());
+			
+			try 
+			{
+				return iCustomerRepository.save(cM);
+			} 
+			catch (Exception e) 
+			{
+				throw new ServiceResourceNotCreatedOrUpdatedException("with user id", id);	
+			}
+		}
+		else
+		{
+			throw new ServiceResourceNotFoundException("Customer", "id", id);	
+		}
+				
 	}
 }

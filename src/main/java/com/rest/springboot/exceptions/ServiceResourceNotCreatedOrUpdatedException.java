@@ -8,20 +8,20 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 public class ServiceResourceNotCreatedOrUpdatedException extends RuntimeException
 {
 	private String fieldName;
-    private String fieldValue;
+    private Integer fieldValue;
 
 
-    public ServiceResourceNotCreatedOrUpdatedException( String fieldName, String fieldValue) {
-        super(String.format("resource not created/updated ", fieldName, fieldValue));
+    public ServiceResourceNotCreatedOrUpdatedException( String fieldName, Integer id) {
+        super(String.format("resource not created/updated ", fieldName, id));
         this.fieldName = fieldName;
-        this.fieldValue = fieldValue;
+        this.fieldValue = id;
     }
 
     public String getFieldName() {
         return fieldName;
     }
 
-    public String getFieldValue() {
+    public Integer getFieldValue() {
         return fieldValue;
     }
 }
