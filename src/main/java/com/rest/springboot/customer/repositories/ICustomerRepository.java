@@ -15,6 +15,10 @@ public interface ICustomerRepository extends JpaRepository<CustomerModel, Intege
 
 	public static final String CUSTOMER_TABLE = "tbl_customer";
 	
+	@Query(value = "SELECT * FROM "+ CUSTOMER_TABLE +  " WHERE DELETED != 0 AND id = ?1", nativeQuery = true)
+	CustomerModel findCustomerByID(final Integer id);
+
+	
 	@Cacheable("customerList")
 	@Query(value = "SELECT * FROM "+ CUSTOMER_TABLE +  " WHERE DELETED = 0", nativeQuery = true)
 	List<CustomerModel> findCustomerList();

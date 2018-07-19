@@ -32,15 +32,15 @@ public class CustomerServiceController
 	ICustomerRepository iCustomerRepository;
 	
 	@GetMapping("/customer/id/{id}")
-	public Optional<CustomerModel> getCustomerById(@PathVariable(value = "id") final Integer id) 
+	public CustomerModel getCustomerById(@PathVariable(value = "id") final Integer id) 
 	{		
 		ServiceUtil.isNotNull(id);
 		
-		Optional<CustomerModel> eM = iCustomerRepository.findById(id);		
+		CustomerModel cM = iCustomerRepository.findCustomerByID(id);		
 		
-		if ( eM.orElse(null) != null && eM.isPresent())
+		if ( cM != null)
 		{
-			return eM;
+			return cM;
 		}	
 		else
 		{
@@ -71,7 +71,7 @@ public class CustomerServiceController
 	{		
 		ServiceUtil.isNotNull(id);
 		
-		CustomerModel cM = iCustomerRepository.getOne(id);
+		CustomerModel cM = iCustomerRepository.findCustomerByID(id);
 		
 		if(cM != null)
 		{
@@ -89,7 +89,7 @@ public class CustomerServiceController
 
 	}
 
-	@PutMapping("/customer/uuid/{uuid}")
+	@PutMapping("/customer/id/{id}")
 	@CacheEvict(cacheNames="customerList", allEntries=true)
 	public CustomerModel updateCustomerByUuid(@PathVariable(value = "id") final Integer id, 
 			@Valid @RequestBody CustomerModel customerModel ) 
